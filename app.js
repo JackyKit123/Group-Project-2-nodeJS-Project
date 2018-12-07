@@ -1,31 +1,34 @@
 //config
 require('dotenv').config();
-const fs = require('fs');
-const path = require('path');
-const options = {
+const 
+fs = require('fs'),
+path = require('path'),
+options = {
   cert: fs.readFileSync(path.join(__dirname, 'cert', 'localhost.crt')),
   key: fs.readFileSync(path.join(__dirname, 'cert', 'localhost.key'))
-};
-const port = process.env.PORT || 3030;
+}
 
 //library dependencies
-const https = require('https');
-const express = require('express');
-const app = express();
-const server = https.createServer(options, app);
-const io = require('socket.io')(server);
-const bodyParser = require('body-parser');
-const hb = require('express-handlebars');
-const passport = require('passport');
-const bcrypt = require('bcrypt');
-const flash = require('connect-flash');
-const expressSession = require('express-session');
-const RedisStore = require('connect-redis')(expressSession);
-const socketIOSession = require("socket.io.session");
-const LocalStrategy = require('passport-local').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
-const redis  = require('redis');
-const knex = require('knex')({
+const 
+https = require('https'),
+express = require('express'),
+app = express(),
+server = https.createServer(options, app),
+io = require('socket.io')(server),
+bodyParser = require('body-parser'),
+hb = require('express-handlebars'),
+passport = require('passport'),
+bcrypt = require('bcrypt'),
+nodemailer = require('nodemailer'),
+randomstring = require("randomstring"),
+flash = require('connect-flash'),
+expressSession = require('express-session'),
+RedisStore = require('connect-redis')(expressSession),
+socketIOSession = require("socket.io.session"),
+LocalStrategy = require('passport-local').Strategy,
+FacebookStrategy = require('passport-facebook').Strategy,
+redis  = require('redis'),
+knex = require('knex')({
   client: 'postgresql',
   connection: {
       database: process.env.DB_NAME,
@@ -35,13 +38,15 @@ const knex = require('knex')({
 });
 
 //modules
-const Bcrypt = require('./auth/bcrypt');
-const redisClient = require('./util/redis')(redis);
-const router = require('./router/router')(express, passport);
+const 
+Bcrypt = require('./auth/bcrypt'),
+NodeMailer = require('./auth/mailVerify'),
+redisClient = require('./util/redis')(redis),
+router = require('./routers/router')(express, passport, knex);
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
-require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, new Bcrypt(bcrypt), knex);
+require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), knex);
 require('./util/socket.io')(io);
 
 //server starts
-server.listen(port, () => console.log(`server started at port ${port} at ${new Date()}`));
+server.listen(process.env.PORT, () => console.log(`server started at port ${process.env.PORT} at ${new Date()}`));
