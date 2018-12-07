@@ -1,16 +1,28 @@
 {{#if error}}
-<div>{{error}}</div>
+<div id="error_message">{{error}}</div>
 {{/if}}
 <form action="/signup" method="post">
     <div>
-        <label>email:</label>
-        <input type="text" name="username" />
+        <label>Email:</label>
+        <input type="text" name="username" autocomplete="on" placeholder="example@example.com" disabled>{{!prevent user input before document loads}}
     </div>
     <div>
         <label>Password:</label>
-        <input type="password" name="password" />
+        <input type="password" name="password" placeholder="．．．．．．．．" disabled>
+    </div>
+    <div id='password_structure_reminder'>
+        <span>Your password must contain the following</span>
+    <ul>
+        <li id='length'>8 to 16 characters long ✘</li>
+        <li id='letter'>Has any letters ✘</li>
+        <li id='number'>Has any numbers ✘</li>
+    </ul>
     </div>
     <div>
-        <input type="submit" value="Sign up" />
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" placeholder="．．．．．．．．" disabled>
+    </div>
+    <div>
+        <input type="submit" value="Sign up" disabled>
     </div>
 </form>

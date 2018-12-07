@@ -1,0 +1,8 @@
+#password_structure_reminder {
+    display:none;
+    color:red;
+}
+
+input {
+    border: 1px solid grey
+}
