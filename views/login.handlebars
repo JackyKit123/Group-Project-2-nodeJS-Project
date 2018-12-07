@@ -1,0 +1,25 @@
+{{#if error}}
+<div>{{error}}</div>
+{{/if}}
+{{#if success}}
+<div>{{success}}</div>
+{{/if}}
+<form action="/login" method="post">
+    <div>
+        <label>email:</label>
+        <input type="text" name="username" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password" />
+    </div>
+    <div>
+        <input type="submit" value="Log In" />
+    </div>
+</form>
+<div>
+    <a href='/auth/facebook'><input type="submit" value="Login with Facebook" /></a>
+</div>
+<div>
+    <a href='/signup'><input type="submit" value="Sign Up" /></a>
+</div>
