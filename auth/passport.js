@@ -1,10 +1,11 @@
-module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
+module.exports = (passport, LocalStrategy, FacebookStrategy, randomstring, bcrypt, nodemailer, knex) => {
     passport.use('local-login', new LocalStrategy(
-        async (username, password, done) => {
+        async (email, password, done) => {
             try {
-                const users = await knex('login_info').where({ username: username });
-                if (users.length == 0) return done(null, false, { message: 'Incorrect credentials.' });
-                const user = users[0];
+                let user = await knex('login_info').where({ email: email });
+                user = user[0]
+                if (user.length == 0) return done(null, false, { message: 'Incorrect credentials.' });
+                if (typeof user.verifying !== 'undefined') return done(null, false, { message: 'Email is not verified, please check your mailbox for verification'})
                 const result = await bcrypt.checkPassword(password, user.password);
                 return (result) ? done(null, user) : done(null, false, { message: 'Incorrect credentials.' });
             } catch (err) {
@@ -14,18 +15,24 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
     ));
 
     passport.use('local-signup', new LocalStrategy(
-        async (username, password, done) => {
+        async (email, password, done) => {
             try {
-                const users = await knex('login_info').where({ username: username });
-                if (users.length > 0) return done(null, false, { message: 'username already taken' });
-                const hash = await bcrypt.hashPassword(password)
+                const user = await knex('login_info').where({ email: email });
+                if (!/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(email)) return done(null, false, { message: 'Invalid Email Address' });
+                if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) return done(null, false, { message: 'Bad Password' });
+                if (user.verifying) return done(null, false, { message: 'Email is already registered but not verified' })
+                if (user.email) return done(null, false, { message: 'Email has already been taken' })
+                const hash = await bcrypt.hashPassword(password);
+                const verifyString = randomstring.generate();
                 const newUser = {
-                    username: username,
-                    password: hash
+                    email: email,
+                    password: hash,
+                    verifying: verifyString
                 };
+                nodemailer.sendMail(email, verifyString);
                 const userId = await knex('login_info').insert(newUser).returning('id');
                 newUser.id = userId[0];
-                return done(null, newUser);
+                return done(null, false, {message: 'Registered'});
             } catch (err) {
                 return done(err);
             }
@@ -36,16 +43,14 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
         clientSecret: process.env.FACEBOOK_SECRET,
         callbackURL: `/auth/facebook/callback`
     }, async (accessToken, refreshToken, profile, done) => {
-        const matchedUser = await knex('login_info').where({ facebook_id: profile.id })
-        console.log(matchedUser)
-        if (matchedUser.length == 0) {
-            const amountOfUsers = await knex('login_info');
+        const matchedUser = await knex('login_info').where({ access_token: accessToken })
+        if (matchedUser.length === 0) {
             const newUser = {
-                id: amountOfUsers.length++,
                 facebook_id: profile.id,
                 access_token: accessToken
             }
-            await knex('login_info').insert(newUser);
+            const userId = await knex('login_info').insert(newUser).returning('id');
+            newUser.id = userId[0];
             return done(null, newUser)
         }
         return done(null, matchedUser[0]);
@@ -53,7 +58,6 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
     ));
 
     passport.serializeUser((user, done) => {
-        console.log(user.id)
         return done(null, user.id);
     });
 
