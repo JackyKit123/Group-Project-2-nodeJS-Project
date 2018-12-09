@@ -1,22 +1,38 @@
 $(() => {
-    if($('#error_message').html() == 'Registered') window.location = "/registered"
+    if ($('#error_message').html() == 'Registered') window.location = "/registered"
 
-    const $email = $("input[name='username']");
+    const $username = $("input[name='username']");
+    const $email = $("input[name='email']");
     const $password = $("input[name='password']");
     const $confirm_password = $("input[name='confirm_password']");
     const $submit = $("input[type='submit']");
 
+
     //prevent user input interrupting script, remove disabled on load
     $email.removeAttr("disabled");
     $password.removeAttr("disabled");
+    $username.removeAttr("disabled");
+    $confirm_password.removeAttr("disabled")
+
+    //validate email input
+    $($username.focusout(() => {
+        if (!validateUsername($username.val())) {
+            $username.css("border", "red solid 1px");
+            $('#invalid_username_reminder').show();
+        } else {
+            $username.css("border", "1px solid grey");
+            $('#invalid_username_reminder').hide();
+        }
+    }));
 
     //validate email input
     $($email.focusout(() => {
         if (!validateEmail($email.val())) {
-            $submit.attr("disabled", "disabled");
             $email.css("border", "red solid 1px");
+            $('#invalid_email_reminder').show();
         } else {
             $email.css("border", "1px solid grey");
+            $('#invalid_email_reminder').hide();
         }
     }));
 
@@ -29,35 +45,38 @@ $(() => {
         validatePassword($password.val());
     }));
 
-    $($password.change(() => {
-        if (validatePassword($password.val())) {
-            $("#password_structure_reminder").fadeOut(500);
-            $confirm_password.removeAttr("disabled");
-        } else {
-            $confirm_password.attr("disabled", "disabled");
-            $submit.attr("disabled", "disabled");
-        }
+    $($password.focusout(() => {
+        if (validatePassword($password.val()))
+            $("#password_structure_reminder").hide();
     }));
 
     //validate the confirmed password
     $($confirm_password.change(() => {
         if ($password.val() !== $confirm_password.val()) {
-            $submit.attr("disabled", "disabled");
             $confirm_password.css("border", "red solid 1px");
+            $('#unmatched_password_reminder').show();
         } else {
             $confirm_password.css("border", "1px solid grey");
+            $('#unmatched_password_reminder').hide();
         }
     }));
 
     //only allow user to press submit once all identities are validated
     $(document).keyup(() => {
-        if (validateEmail($email.val()) && validatePassword($password.val()) && $password.val() == $confirm_password.val())
-        $submit.removeAttr("disabled");
+        if (validateUsername($username.val()) && validateEmail($email.val()) && validatePassword($password.val()) && $password.val() == $confirm_password.val())
+            $submit.removeAttr("disabled");
+        else
+            $submit.attr("disabled", "disabled");
     })
 
     const validateEmail = email => {
         const validator = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         return validator.test(email);
+    }
+
+    const validateUsername = username => {
+        const validator = /^[0-9a-zA-Z_.-]+$/i;
+        return validator.test(username);
     }
 
     const validatePassword = password => {

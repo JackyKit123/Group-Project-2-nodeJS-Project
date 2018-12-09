@@ -1,3 +1,1 @@
-$(() => {
-    setTimeout(() => { window.location = "/"; }, 5000);
-})
+$(() => setTimeout(() => window.location = "/", 5000))
