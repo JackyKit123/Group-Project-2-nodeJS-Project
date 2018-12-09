@@ -8,13 +8,14 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
     router.post('/signup', async (req, res) => {
         try {
             const username = req.body.username;
+            const displayname = req.body.display_name;
             const email = req.body.email;
             const password = req.body.password;
             const checkUsername = await knex('login_info').where('username', username);
             const checkEmail = await knex('login_info').where('email', email);
             const usernameRegistered = checkUsername[0];
             const emailRegistered = checkEmail[0];
-            if (!/^[0-9a-zA-Z_.-]+$/i.test(username)) {
+            if ((username.length < 5 || username.length > 15 || /\W/.test(username))) {
                 req.flash('error', 'Invalid Username');
                 return res.redirect('/signup')
             }
@@ -24,6 +25,10 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
             }
             if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) {
                 req.flash('error', 'Bad Password')
+                return res.redirect('/signup');
+            }
+            if (displayname.legnth < 5 || displayname.length > 15) {
+                req.flash('error', 'Bad Displayed Name')
                 return res.redirect('/signup');
             }
             if (typeof emailRegistered !== 'undefined' && emailRegistered.verifying) {
@@ -40,8 +45,10 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
             }
             const hash = await bcrypt.hashPassword(password);
             const verifyString = randomstring.generate();
+            console.log(req.body)
             const newUser = {
                 username: username,
+                display_name: displayname,
                 email: email,
                 password: hash,
                 verifying: verifyString

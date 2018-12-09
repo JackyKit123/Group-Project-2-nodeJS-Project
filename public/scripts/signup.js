@@ -2,6 +2,7 @@ $(() => {
     if ($('#error_message').html() == 'Registered') window.location = "/registered"
 
     const $username = $("input[name='username']");
+    const $displayname = $("input[name='display_name']");
     const $email = $("input[name='email']");
     const $password = $("input[name='password']");
     const $confirm_password = $("input[name='confirm_password']");
@@ -9,10 +10,8 @@ $(() => {
 
 
     //prevent user input interrupting script, remove disabled on load
-    $email.removeAttr("disabled");
-    $password.removeAttr("disabled");
-    $username.removeAttr("disabled");
-    $confirm_password.removeAttr("disabled")
+    $('input').removeAttr("disabled");
+    $submit.attr('disabled','disabled');
 
     //validate email input
     $($username.focusout(() => {
@@ -22,6 +21,17 @@ $(() => {
         } else {
             $username.css("border", "1px solid grey");
             $('#invalid_username_reminder').hide();
+        }
+    }));
+
+    //validate display name
+    $($displayname.focusout(() => {
+        if (!validateDisplayName($displayname.val())) {
+            $displayname.css("border", "red solid 1px");
+            $('#invalid_displayedname_reminder').show();
+        } else {
+            $displayname.css("border", "1px solid grey");
+            $('#invalid_displayedname_reminder').hide();
         }
     }));
 
@@ -48,10 +58,14 @@ $(() => {
     $($password.focusout(() => {
         if (validatePassword($password.val()))
             $("#password_structure_reminder").hide();
+        if ($password.val() == $confirm_password.val()) {
+            $confirm_password.css("border", "1px solid grey");
+            $('#unmatched_password_reminder').hide();
+        }
     }));
 
     //validate the confirmed password
-    $($confirm_password.change(() => {
+    $($confirm_password.focusout(() => {
         if ($password.val() !== $confirm_password.val()) {
             $confirm_password.css("border", "red solid 1px");
             $('#unmatched_password_reminder').show();
@@ -70,13 +84,17 @@ $(() => {
     })
 
     const validateEmail = email => {
-        const validator = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+        const validator = /(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
         return validator.test(email);
     }
 
+
     const validateUsername = username => {
-        const validator = /^[0-9a-zA-Z_.-]+$/i;
-        return validator.test(username);
+        return (username.length >= 5 && username.length <= 15 && !/\W/.test(username))
+    }
+
+    const validateDisplayName = name => {
+        return (name.length >= 5 && name.length <= 15)
     }
 
     const validatePassword = password => {
