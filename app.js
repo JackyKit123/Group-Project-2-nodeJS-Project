@@ -18,6 +18,9 @@ io = require('socket.io')(server),
 bodyParser = require('body-parser'),
 hb = require('express-handlebars'),
 passport = require('passport'),
+LocalStrategy = require('passport-local').Strategy,
+FacebookStrategy = require('passport-facebook').Strategy,
+GoogleStrategy = require('passport-google-oauth20').Strategy,
 bcrypt = require('bcrypt'),
 nodemailer = require('nodemailer'),
 randomstring = require("randomstring"),
@@ -25,8 +28,6 @@ flash = require('connect-flash'),
 expressSession = require('express-session'),
 RedisStore = require('connect-redis')(expressSession),
 socketIOSession = require("socket.io.session"),
-LocalStrategy = require('passport-local').Strategy,
-FacebookStrategy = require('passport-facebook').Strategy,
 redis  = require('redis'),
 knex = require('knex')({
   client: 'postgresql',
@@ -45,7 +46,7 @@ redisClient = require('./util/redis')(redis),
 router = require('./routers/router')(express, passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer));
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
-require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, new Bcrypt(bcrypt), knex);
+require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
 require('./util/socket.io')(io);
 
 //server starts

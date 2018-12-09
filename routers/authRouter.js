@@ -57,6 +57,16 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
         }
     });
 
+    router.get("/auth/google", passport.authenticate('google', {
+        scope: ['profile']
+    }));
+
+    router.get("/auth/google/callback", passport.authenticate('google', {
+        failureRedirect: '/login',
+        failureFlash: true
+    }), (req, res) => (req.session.save(() => res.redirect('/lobby')))
+    );
+
     router.get("/auth/facebook", passport.authenticate('facebook', {
         scope: ['user_friends', 'manage_pages']
     }));

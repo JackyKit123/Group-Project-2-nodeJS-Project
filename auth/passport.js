@@ -1,4 +1,4 @@
-module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
+module.exports = (passport, LocalStrategy, FacebookStrategy, GoogleStrategy, bcrypt, knex) => {
     passport.use('local-login', new LocalStrategy(
         async (username, password, done) => {
             try {
@@ -21,6 +21,26 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
         }
     ));
 
+    passport.use('google', new GoogleStrategy({
+        clientID: process.env.GOOGLE_ID,
+        clientSecret: process.env.GOOGLE_SECRET,
+        callbackURL: `/auth/google/callback`
+    }, async (accessToken, refreshToken, profile, done) => {
+        const matchedUser = await knex('login_info').where({ access_token: accessToken })
+        if (matchedUser.length === 0) {
+            const newUser = {
+                display_name: profile.displayName,
+                google_id: profile.id,
+                access_token: accessToken
+            }
+            const userId = await knex('login_info').insert(newUser).returning('id');
+            newUser.id = userId[0];
+            return done(null, newUser)
+        }
+        return done(null, matchedUser[0]);
+    }
+    ));
+
     passport.use('facebook', new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
         clientSecret: process.env.FACEBOOK_SECRET,
@@ -29,6 +49,7 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, bcrypt, knex) => {
         const matchedUser = await knex('login_info').where({ access_token: accessToken })
         if (matchedUser.length === 0) {
             const newUser = {
+                display_name: profile.displayName,
                 facebook_id: profile.id,
                 access_token: accessToken
             }
