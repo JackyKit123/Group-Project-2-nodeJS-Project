@@ -13,7 +13,7 @@ module.exports = router => {
     router.get('/', (req, res) => res.render('index'));
     router.get('/login', this.notLoggedIn, (req, res) => res.render('login', { error: req.flash('error'), success: req.flash('success') }))
     router.get('/signup', this.notLoggedIn, (req, res) => res.render('signup', { script: 'signup', stylesheet: 'signup', error: req.flash('error') }));
-    router.get('/registered', this.notLoggedIn, (req, res) => res.render('registered', { script: 'registered'}));
-    router.get('/logout', this.notLoggedIn, (req, res) => res.render('logout', { script: 'logout'}));
+    router.get('/registered', this.notLoggedIn, (req, res) => res.render('registered', { script: 'registered', success: req.flash('registered')}));
+    router.get('/logout', this.notLoggedIn, (req, res) => res.render('logout', { script: 'logout', success: req.flash('logout')}));
     router.get('/lobby', this.isLoggedIn, (req, res) => res.render('lobby', {}));
 }
