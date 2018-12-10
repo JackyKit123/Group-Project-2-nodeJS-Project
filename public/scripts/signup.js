@@ -1,6 +1,4 @@
 $(() => {
-    if ($('#error_message').html() == 'Registered') window.location = "/registered"
-
     const $username = $("input[name='username']");
     const $displayname = $("input[name='display_name']");
     const $email = $("input[name='email']");
@@ -13,7 +11,7 @@ $(() => {
     $('input').removeAttr("disabled");
     $submit.attr('disabled','disabled');
 
-    //validate email input
+    //validate username input
     $($username.focusout(() => {
         if (!validateUsername($username.val())) {
             $username.css("border", "red solid 1px");
