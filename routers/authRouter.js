@@ -1,9 +1,26 @@
-module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer, redisClient) => {
-    router.post('/login', passport.authenticate('local-login', {
+module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodemailer, redisClient) => {
+    const loginCaptcha = (req, res, next) => {
+        if (req.recaptcha.error) {
+            req.flash('error','Invalid reCAPTCHA');
+            res.redirect('/login');
+        } else {
+            return next();
+        }
+    }
+
+    const signupCaptcha = (req, res, next) => {
+        if (req.recaptcha.error) {
+            req.flash('error','Invalid reCAPTCHA');
+            res.redirect('/signup');
+        } else {
+            return next();
+        }
+    }
+
+    router.post('/login', recaptcha.middleware.verify, loginCaptcha, passport.authenticate('local-login', {
         failureRedirect: '/login',
         failureFlash: true
-    }), (req, res) => (req.session.save(() => res.redirect('/lobby')))
-    );
+    }), (req, res) => (req.session.save(() => res.redirect('/lobby'))));
 
     router.post('/signup', async (req, res) => {
         try {
@@ -63,7 +80,11 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer, redi
         }
     });
 
-    router.post('/password/forget', (req, res) => {
+    router.post('/password/forget', recaptcha.middleware.verify, (req, res) => {
+        if (req.recaptcha.error) {
+            req.flash('error','Invalid reCAPTCHA');
+            return res.redirect('/password/forget');
+        }
         const resetKey = randomstring.generate();
         const email = req.body.email;
         redisClient.setex(`${resetKey}`, 60 * 60 * 24 , email);

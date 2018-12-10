@@ -16,16 +16,21 @@ module.exports = (router, redisClient) => {
 
     router.get('/login', this.notLoggedIn, (req, res) => res.render('login', {
         error: req.flash('error'),
-        success: req.flash('success')
+        success: req.flash('success'),
+        recaptcha: process.env.reCAPTCHA_SITE_KEY
     }));
 
     router.get('/signup', this.notLoggedIn, (req, res) => res.render('signup', {
         script: 'signup',
         stylesheet: 'signup',
-        error: req.flash('error')
+        error: req.flash('error'),
+        recaptcha: process.env.reCAPTCHA_SITE_KEY
     }));
 
-    router.get('/password/forget', this.notLoggedIn, (req, res) => res.render('forget'));
+    router.get('/password/forget', this.notLoggedIn, (req, res) => res.render('forget', {
+        error: req.flash('error'),
+        recaptcha: process.env.reCAPTCHA_SITE_KEY 
+    }));
 
     router.get('/password/reset/:id', this.notLoggedIn, (req, res) => {
         const key = req.params.id

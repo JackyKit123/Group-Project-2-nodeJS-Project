@@ -17,6 +17,7 @@ server = https.createServer(options, app),
 io = require('socket.io')(server),
 bodyParser = require('body-parser'),
 hb = require('express-handlebars'),
+Recaptcha = require('express-recaptcha').Recaptcha,
 passport = require('passport'),
 LocalStrategy = require('passport-local').Strategy,
 FacebookStrategy = require('passport-facebook').Strategy,
@@ -43,7 +44,7 @@ const
 Bcrypt = require('./auth/bcrypt'),
 NodeMailer = require('./auth/mailVerify'),
 redisClient = require('./util/redis')(redis),
-router = require('./routers/router')(express, passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), redisClient);
+router = require('./routers/router')(express, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), redisClient);
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
 require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
