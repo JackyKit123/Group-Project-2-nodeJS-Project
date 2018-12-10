@@ -106,12 +106,9 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
     router.get("/auth/verify/:id", async (req, res) => {
         try {
             const key = req.params.id
-            const users = await knex('login_info')
-            if (!users.some(e => {
-                return e.verifying == key
-            })) return res.end('invalid verification');
             let user = await knex('login_info').where('verifying', key);
             user = user[0];
+            if(!user) return res.end('Invalid Verification Code')
             const newUser = {
                 email: user.email,
                 password: user.password,
