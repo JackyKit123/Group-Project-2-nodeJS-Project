@@ -1,6 +1,6 @@
-module.exports = (express, passport, knex, randomstring, bcrypt, nodemailer) => {
+module.exports = (express, passport, knex, randomstring, bcrypt, nodemailer, redisClient) => {
     const router = express.Router();
-    require('./viewRouter')(router);
-    require('./authRouter')(router, passport, knex, randomstring, bcrypt, nodemailer)
+    require('./viewRouter')(router, redisClient);
+    require('./authRouter')(router, passport, knex, randomstring, bcrypt, nodemailer, redisClient)
     return router;
 };

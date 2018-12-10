@@ -43,7 +43,7 @@ const
 Bcrypt = require('./auth/bcrypt'),
 NodeMailer = require('./auth/mailVerify'),
 redisClient = require('./util/redis')(redis),
-router = require('./routers/router')(express, passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer));
+router = require('./routers/router')(express, passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), redisClient);
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
 require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
