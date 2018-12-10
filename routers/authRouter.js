@@ -20,32 +20,31 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
                 return res.redirect('/signup')
             }
             if (!/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(email)) {
-                req.flash('error', 'Invalid Email Address');
+                req.flash('error', '<p>Invalid Email Address</p>');
                 return res.redirect('/signup');
             }
             if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) {
-                req.flash('error', 'Bad Password')
+                req.flash('error', '<p>Bad Password</p>')
                 return res.redirect('/signup');
             }
             if (displayname.legnth < 5 || displayname.length > 15) {
-                req.flash('error', 'Bad Displayed Name')
+                req.flash('error', '<p>Bad Displayed Name</p>')
                 return res.redirect('/signup');
             }
             if (typeof emailRegistered !== 'undefined' && emailRegistered.verifying) {
-                req.flash('error', 'Email is already registered but not verified')
+                req.flash('error', `<p>Email is already registered but not verified, <a href='/resend/${email}'>Click Here<a> if you wish to recieve the verification email again.</p>`)
                 return res.redirect('/signup');
             }
             if (emailRegistered) {
-                req.flash('error', 'Email has already been taken')
+                req.flash('error', '<p>Email has already been taken</p>')
                 return res.redirect('/signup');
             }
             if (usernameRegistered) {
-                req.flash('error', 'Username has already been taken')
+                req.flash('error', '<p>Username has already been taken</p>')
                 return res.redirect('/signup');
             }
             const hash = await bcrypt.hashPassword(password);
             const verifyString = randomstring.generate();
-            console.log(req.body)
             const newUser = {
                 username: username,
                 display_name: displayname,
@@ -88,6 +87,20 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
         req.logout();
         req.flash('logout', `You have successfully logged out`)
         res.redirect('/logout');
+    })
+
+    router.get("/resend/:id", async (req, res) => {
+        try {
+            const email = req.params.id
+            let user = await knex('login_info').where('email', email)
+            user = user[0]
+            if(!user) return res.end('invalid email');
+            nodemailer.sendMail(email, user.verifying);
+            req.flash('registered', `Email sent, please be reminded that the email may be in your junk mail box`);
+            res.redirect('/registered')
+        } catch (err) {
+            res.status(500).json(err)
+        }
     })
 
     router.get("/auth/verify/:id", async (req, res) => {

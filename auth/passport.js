@@ -10,11 +10,11 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, GoogleStrategy, bcr
                 } else if (loginByUsername.length > 0) {
                     user = loginByUsername[0];
                 }  else {
-                    return done(null, false, { message: 'Incorrect credentials.' })
+                    return done(null, false, { message: '<p>Incorrect credentials.</p>' })
                 };
-                if (user.verifying) return done(null, false, { message: 'Email is not verified, please check your mailbox for verification' })
+                if (user.verifying) return done(null, false, { message: `<p>Email is already registered but not verified, <a href='/resend/${username}'>Click Here</a> if you wish to recieve the verification email again.</p>` })
                 const result = await bcrypt.checkPassword(password, user.password);
-                return (result) ? done(null, user) : done(null, false, { message: 'Incorrect credentials.' });
+                return (result) ? done(null, user) : done(null, false, { message: '<p>Incorrect credentials.</p>' });
             } catch (err) {
                 return done(err);
             }
