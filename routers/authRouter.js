@@ -16,7 +16,7 @@ module.exports = (router, passport, knex, randomstring, bcrypt, nodemailer) => {
             const usernameRegistered = checkUsername[0];
             const emailRegistered = checkEmail[0];
             if ((username.length < 5 || username.length > 15 || /\W/.test(username))) {
-                req.flash('error', 'Invalid Username');
+                req.flash('error', '<p>Invalid Username</p>');
                 return res.redirect('/signup')
             }
             if (!/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(email)) {
