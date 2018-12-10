@@ -24,9 +24,9 @@ module.exports = router => {
         error: req.flash('error')
     }));
 
-    router.get('/registered', this.notLoggedIn, (req, res) => res.render('registered', {
-        script: 'registered',
-        success: req.flash('registered')
+    router.get('/success', this.notLoggedIn, (req, res) => res.render('success', {
+        script: 'success',
+        success: req.flash('success')
     }));
 
     router.get('/logout', this.notLoggedIn, (req, res) => res.render('logout', {
