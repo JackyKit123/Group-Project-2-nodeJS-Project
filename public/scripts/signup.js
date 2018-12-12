@@ -16,6 +16,7 @@ $(() => {
         $('#username_reminder').show();
         if (!validateUsername($username.val())) {
             $username.css("border", "2px red solid");
+            $('#username_reminder').css('color', 'red');
         } else {
             $username.css("border", "2px solid green");
             $('#username_reminder').css('color', 'green');
@@ -25,6 +26,7 @@ $(() => {
     $($username.keyup(() => {
         if (!validateUsername($username.val())) {
             $username.css("border", "2px red solid");
+            $('#username_reminder').css('color', 'red');
         } else {
             $username.css("border", "2px solid green");
             $('#username_reminder').css('color', 'green');
@@ -42,6 +44,7 @@ $(() => {
         $('#displayedname_reminder').show();
         if (!validateDisplayName($displayname.val())) {
             $displayname.css("border", "2px red solid");
+            $('#displayedname_reminder').css('color', 'red');
         } else {
             $displayname.css("border", "2px solid green");
             $('#displayedname_reminder').css('color', 'green');
@@ -51,6 +54,7 @@ $(() => {
     $($displayname.keyup(() => {
         if (!validateDisplayName($displayname.val())) {
             $displayname.css("border", "2px red solid");
+            $('#displayedname_reminder').css('color', 'red');
         } else {
             $displayname.css("border", "2px solid green");
             $('#displayedname_reminder').css('color', 'green');

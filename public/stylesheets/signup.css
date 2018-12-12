@@ -18,6 +18,7 @@ body {
 #container {
     font-size: 1.3em;
     background: white;
+    overflow: auto;
     margin: auto;
     width: 350px;
     display: flex;
