@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Blackjack Game</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="stylesheet.css">
+        <style>
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages li { padding: 5px 10px; }
+        #messages li:nth-child(odd) { background: #eee; }
+        </style>
+    </head>
+    <body>
+        <div class="game">
+            <h1>Blackjack</h1>
+            <form id='initial'>
+                Number of players:<br>
+                <input type="text" name="playerCount" id='playercount' placeholder="2" autocomplete="off"><br>
+                Number of decks:<br>
+                <input type="text" name="deckCount" placeholder="1" autocomplete="off"><br><br>
+                <input type="submit" value="Submit">
+              </form>
+            <input type="button" class="btn" id="btnStart" value="start" onclick="startGame()" />
+            <input type="button" class="btn" id='hitMe' value="hit me" onclick="hit()" />
+            <input type="button" class="btn" id='stay' value="stay" onclick="stay()" />
+            <input type="button" class="btn" value="double down" onclick="doubleDown()" />
+        
+            
+            <div id="dealer"></div>
+            <div id="players" class="players">
+            </div>
+        
+            <div id="deck" class="deck">
+                <div class="card" id="deckcount">52</div>
+                <div class="status" id="status"></div>
+            </div>
+        
+            <div class="clear"></div>
+        </div>
+
+        <ul id="messages"></ul>
+        <form action="">
+            <input id="m" autocomplete="off" /><button>Send</button>
+        </form>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.slim.js"></script>
+        <script src="./jquery-3.3.1.js"></script> 
+        <script src="../game.js" async defer></script>
+
+        <script type="text/javascript">
+            $(function(){
+                var socket = io();
+                socket.on('bust',function(status){
+                    $('#messages').append($('<li>').text(status));
+                });
+                socket.on('hit',function(status){
+                    $('#messages').append($('<li>').text(status));
+                });
+                socket.on('start',function(status){
+                    $('#messages').append($('<li>').text(status));
+                })
+                $('form').submit(function(){
+                    socket.emit('chat message', $('#m').val());
+                    $('#m').val('');
+                    return false;
+                });
+                socket.on('chat message', function(msg){
+                    $('#messages').append($('<li>').text(msg));
+                });
+            });
+        </script>
+           
+
+
+    </body>
+
+</html>
