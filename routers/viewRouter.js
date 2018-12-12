@@ -11,10 +11,11 @@ module.exports = (router, redisClient) => {
     }
 
     router.get('/', (req, res) => res.render('index', {
-        script: 'main',
+        stylesheet: 'index',
     }));
 
     router.get('/login', this.notLoggedIn, (req, res) => res.render('login', {
+        stylesheet: 'login',
         error: req.flash('error'),
         success: req.flash('success'),
         recaptcha: process.env.reCAPTCHA_SITE_KEY
@@ -28,6 +29,7 @@ module.exports = (router, redisClient) => {
     }));
 
     router.get('/password/forget', this.notLoggedIn, (req, res) => res.render('forget', {
+        stylesheet: 'forget',
         error: req.flash('error'),
         recaptcha: process.env.reCAPTCHA_SITE_KEY 
     }));
@@ -38,6 +40,7 @@ module.exports = (router, redisClient) => {
             if (err) throw err
             if (!data) res.end('Expired Password Reset Key')
             else res.render('reset', {
+                recaptcha: process.env.reCAPTCHA_SITE_KEY ,
                 key: key,
                 script: 'reset',
                 stylesheet: 'reset'
@@ -46,11 +49,13 @@ module.exports = (router, redisClient) => {
     })
 
     router.get('/success', this.notLoggedIn, (req, res) => res.render('success', {
+        stylesheet: 'success',
         script: 'success',
         success: req.flash('success')
     }));
 
     router.get('/logout', this.notLoggedIn, (req, res) => res.render('logout', {
+        stylesheet: 'logout',
         script: 'logout',
         success: req.flash('logout')
     }));
