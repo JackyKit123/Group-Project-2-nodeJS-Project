@@ -1,7 +1,7 @@
-module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodemailer, redisClient) => {
+module.exports = (router, recaptcha, passport, authService) => {
     const loginCaptcha = (req, res, next) => {
         if (req.recaptcha.error) {
-            req.flash('error','Invalid reCAPTCHA');
+            req.flash('error', 'Invalid reCAPTCHA');
             res.redirect('/login');
         } else {
             return next();
@@ -10,7 +10,7 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
 
     const signupCaptcha = (req, res, next) => {
         if (req.recaptcha.error) {
-            req.flash('error','Invalid reCAPTCHA');
+            req.flash('error', 'Invalid reCAPTCHA');
             res.redirect('/signup');
         } else {
             return next();
@@ -22,64 +22,16 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
         failureFlash: true
     }), (req, res) => (req.session.save(() => res.redirect('/lobby'))));
 
-    router.post('/signup',  recaptcha.middleware.verify, signupCaptcha, async (req, res) => {
+    router.post('/signup', recaptcha.middleware.verify, signupCaptcha, async (req, res) => {
         try {
-            const username = req.body.username;
-            const displayname = req.body.display_name;
-            const email = req.body.email;
-            const password = req.body.password;
-            const confirm_password = req.body.confirm_password;
-            const checkUsername = await knex('login_info').where('username', username);
-            const checkEmail = await knex('login_info').where('email', email);
-            const usernameRegistered = checkUsername[0];
-            const emailRegistered = checkEmail[0];
-            if ((username.length < 5 || username.length > 15 || /\W/.test(username))) {
-                req.flash('error', '<p>Invalid Username</p>');
-                return res.redirect('/signup')
-            }
-            if (!/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(email)) {
-                req.flash('error', '<p>Invalid Email Address</p>');
+            const result = await authService.signUp(req.body.username, req.body.display_name, req.body.email, req.body.password, req.body.confirm_password)
+            if (result.error) {
+                req.flash('error', result.error);
                 return res.redirect('/signup');
+            } else {
+                req.flash('success', result.success);
+                return res.redirect('/success');
             }
-            if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) {
-                req.flash('error', '<p>Bad Password</p>')
-                return res.redirect('/signup');
-            }
-            if (displayname.legnth < 5 || displayname.length > 15) {
-                req.flash('error', '<p>Bad Displayed Name</p>')
-                return res.redirect('/signup');
-            }
-            if (password !== confirm_password) {
-                req.flash('error', 'Password not matched');
-                return res.redirect(`/password/reset/${key}`);
-            }
-            if (typeof emailRegistered !== 'undefined' && emailRegistered.verifying) {
-                req.flash('error', `<p>Email is already registered but not verified, <a href='/resend/${email}'>Click Here<a> if you wish to recieve the verification email again.</p>`)
-                return res.redirect('/signup');
-            }
-            if (emailRegistered) {
-                req.flash('error', '<p>Email has already been taken</p>')
-                return res.redirect('/signup');
-            }
-            if (usernameRegistered) {
-                req.flash('error', '<p>Username has already been taken</p>')
-                return res.redirect('/signup');
-            }
-            const hash = await bcrypt.hashPassword(password);
-            const verifyString = randomstring.generate();
-            const newUser = {
-                username: username,
-                display_name: displayname,
-                email: email,
-                password: hash,
-                verifying: verifyString
-            };
-            nodemailer.sendVerificationMail(email, verifyString);
-            await knex('login_info').insert(newUser);
-            req.flash('success', `You have successfully registered
-            Please check your email box for verifcation email
-            Please note that the email may be in junk mail box`);
-            return res.redirect('/success');
         } catch (err) {
             return res.status(500).json(err)
         }
@@ -87,44 +39,39 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
 
     router.post('/password/forget', recaptcha.middleware.verify, async (req, res) => {
         if (req.recaptcha.error) {
-            req.flash('error','Invalid reCAPTCHA');
+            req.flash('error', 'Invalid reCAPTCHA');
             return res.redirect('/password/forget');
         }
-        const resetKey = randomstring.generate();
-        const email = req.body.email;
-        let exist = await knex('login_info').where('email', email);
-        exist = exist[0];
-        if (!exist) {
-            req.flash('error','Email does not match any user');
-            return res.redirect('/password/forget');
+        try {
+            const result = await authService.forgetPassword(req.body.email);
+            if (result.error) {
+                req.flash('error', result.error);
+                return res.redirect('/password/forget');
+            } else {
+                req.flash('success', result.success);
+                return res.redirect('/success');
+            }
+        } catch (err) {
+            return res.status(500).json(err)
         }
-        redisClient.setex(`${resetKey}`, 60 * 60 * 24 , email);
-        nodemailer.sendPasswordResetMail(email, resetKey);
-        req.flash('success', 'Please check your mailbox for instruction to reset your password, Please note that the email may be in junk mail box')
-        res.redirect('/success');
     });
 
-    router.post('/password/reset/:id', (req, res) => {
-        const key = req.params.id;
-        const password = req.body.password;
-        const confirm_password = req.body.confirm_password;
-        if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) {
-            req.flash('error', '<p>Bad Password</p>')
-            return res.redirect(`/password/reset/${key}`);
+    router.post('/password/reset/:id', async (req, res) => {
+        try {
+            const key = req.params.id
+            const result = await authService.resetPassword(key, req.body.password, req.body.confirm_password)
+            if (result.error == 'Expired Password Reset Key') {
+                return res.end('Expired Password Reset Key');
+            } else if (result.error) {
+                req.flash('error', result.error)
+                return res.redirect(`/password/reset/${key}`);
+            } else {
+                req.flash('success', result.success);
+                return res.redirect('/success');
+            }
+        } catch (err) {
+            return res.status(500).json(err)
         }
-        if (password !== confirm_password) {
-            req.flash('error', 'Password not matched');
-            return res.redirect(`/password/reset/${key}`);
-        }
-        redisClient.get(key, async (err, email) => {
-            if (err) throw err
-            if (!email) res.end('Expired Password Reset Key');
-            const hash = await bcrypt.hashPassword(password);
-            await knex('login_info').where('email', email).update('password', hash)
-            redisClient.del(key)
-            req.flash('success', 'You have successfully changed your password, you may now login with your new password');
-            res.redirect('/success');
-        });
     });
 
     router.get("/auth/google", passport.authenticate('google', {
@@ -155,13 +102,10 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
 
     router.get("/resend/:id", async (req, res) => {
         try {
-            const email = req.params.id
-            let user = await knex('login_info').where('email', email)
-            user = user[0]
-            if(!user) return res.end('invalid email');
-            nodemailer.sendVerificationMail(email, user.verifying);
-            req.flash('success', `Email sent, please be reminded that the email may be in your junk mail box`);
-            res.redirect('/success')
+            const result = await authService.resendVerificationMail(req.params.id);
+            if (result.error) return res.end(result.error);
+            req.flash('success', result.success);
+            res.redirect('/success');
         } catch (err) {
             res.status(500).json(err)
         }
@@ -169,18 +113,10 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
 
     router.get("/auth/verify/:id", async (req, res) => {
         try {
-            const key = req.params.id
-            let user = await knex('login_info').where('verifying', key);
-            user = user[0];
-            if(!user) return res.end('Invalid Verification Code')
-            const newUser = {
-                email: user.email,
-                password: user.password,
-                verifying: null
-            }
-            await knex('login_info').where('verifying', key).update(newUser);
-            req.flash('success', `You have successfully verified your email address, you may now login to the game`);
-            res.redirect('/success')
+            const result = await authService.verifyEmail(req.params.id);
+            if (result.error) return res.end(result.err);
+            req.flash('success', result.success);
+            res.redirect('/success');
         } catch (err) {
             res.status(500).json(err)
         }

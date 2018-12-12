@@ -1,6 +1,6 @@
-module.exports = (express, recaptcha, passport, knex, randomstring, bcrypt, nodemailer, redisClient) => {
+module.exports = (express, recaptcha, passport, authService) => {
     const router = express.Router();
-    require('./viewRouter')(router, redisClient);
-    require('./authRouter')(router, recaptcha, passport, knex, randomstring, bcrypt, nodemailer, redisClient)
+    require('./viewRouter')(router, authService);
+    require('./authRouter')(router, recaptcha, passport, authService)
     return router;
 };

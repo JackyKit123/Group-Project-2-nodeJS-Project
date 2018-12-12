@@ -1,4 +1,4 @@
-module.exports = (router, redisClient) => {
+module.exports = (router, authService) => {
     this.isLoggedIn = (req, res, next) => {
         if (req.isAuthenticated()) return next()
         req.flash('error', 'Please log in');
@@ -35,17 +35,14 @@ module.exports = (router, redisClient) => {
     }));
 
     router.get('/password/reset/:id', this.notLoggedIn, (req, res) => {
-        const key = req.params.id
-        redisClient.get(key, (err, data) => {
-            if (err) throw err
-            if (!data) res.end('Expired Password Reset Key')
-            else res.render('reset', {
-                recaptcha: process.env.reCAPTCHA_SITE_KEY ,
-                key: key,
-                script: 'reset',
-                stylesheet: 'reset'
-            })
-        })
+        const verify = authService.verifyResetKey(req.params.id);
+        if (verify) res.render('reset', {
+            recaptcha: process.env.reCAPTCHA_SITE_KEY ,
+            key: key,
+            script: 'reset',
+            stylesheet: 'reset'
+        });
+        else res.end('Expired Password Reset Key');
     })
 
     router.get('/success', this.notLoggedIn, (req, res) => res.render('success', {

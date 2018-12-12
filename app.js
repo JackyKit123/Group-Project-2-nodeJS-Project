@@ -44,7 +44,8 @@ const
 Bcrypt = require('./auth/bcrypt'),
 NodeMailer = require('./auth/mailVerify'),
 redisClient = require('./util/redis')(redis),
-router = require('./routers/router')(express, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, knex, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), redisClient);
+authService = require('./auth/authService'),
+router = require('./routers/router')(express, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, new authService(knex, new Bcrypt(bcrypt), new NodeMailer(nodemailer), randomstring, redisClient));
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
 require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
