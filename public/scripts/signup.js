@@ -9,38 +9,68 @@ $(() => {
 
     //prevent user input interrupting script, remove disabled on load
     $('input').removeAttr("disabled");
-    $submit.attr('disabled','disabled');
+    $submit.attr('disabled', 'disabled');
 
     //validate username input
-    $($username.focusout(() => {
+    $($username.focus(() => {
+        $('#username_reminder').show();
         if (!validateUsername($username.val())) {
-            $username.css("border", "red solid 1px");
-            $('#invalid_username_reminder').show();
+            $username.css("border", "2px red solid");
         } else {
-            $username.css("border", "1px solid grey");
-            $('#invalid_username_reminder').hide();
+            $username.css("border", "2px solid green");
+            $('#username_reminder').css('color', 'green');
+        }
+    }))
+
+    $($username.keyup(() => {
+        if (!validateUsername($username.val())) {
+            $username.css("border", "2px red solid");
+        } else {
+            $username.css("border", "2px solid green");
+            $('#username_reminder').css('color', 'green');
+        }
+    }))
+
+    $($username.focusout(() => {
+        if (validateUsername($username.val())) {
+            $('#username_reminder').hide();
         }
     }));
 
     //validate display name
-    $($displayname.focusout(() => {
+    $($displayname.focus(() => {
+        $('#displayedname_reminder').show();
         if (!validateDisplayName($displayname.val())) {
-            $displayname.css("border", "red solid 1px");
-            $('#invalid_displayedname_reminder').show();
+            $displayname.css("border", "2px red solid");
         } else {
-            $displayname.css("border", "1px solid grey");
-            $('#invalid_displayedname_reminder').hide();
+            $displayname.css("border", "2px solid green");
+            $('#displayedname_reminder').css('color', 'green');
+        }
+    }))
+
+    $($displayname.keyup(() => {
+        if (!validateDisplayName($displayname.val())) {
+            $displayname.css("border", "2px red solid");
+        } else {
+            $displayname.css("border", "2px solid green");
+            $('#displayedname_reminder').css('color', 'green');
+        }
+    }))
+
+    $($displayname.focusout(() => {
+        if (validateDisplayName($displayname.val())) {
+            $('#displayedname_reminder').hide();
         }
     }));
 
     //validate email input
     $($email.focusout(() => {
         if (!validateEmail($email.val())) {
-            $email.css("border", "red solid 1px");
-            $('#invalid_email_reminder').show();
+            $email.css("border", "2px red solid");
+            $('#email_reminder').show();
         } else {
-            $email.css("border", "1px solid grey");
-            $('#invalid_email_reminder').hide();
+            $email.css("border", "2px solid green");
+            $('#email_reminder').hide();
         }
     }));
 
@@ -54,21 +84,22 @@ $(() => {
     }));
 
     $($password.focusout(() => {
-        if (validatePassword($password.val()))
+        if (validatePassword($password.val())) {
             $("#password_structure_reminder").hide();
         if ($password.val() == $confirm_password.val()) {
-            $confirm_password.css("border", "1px solid grey");
+            $confirm_password.css("border", "2px solid green");
             $('#unmatched_password_reminder').hide();
         }
+    }
     }));
 
     //validate the confirmed password
     $($confirm_password.focusout(() => {
-        if ($password.val() !== $confirm_password.val()) {
-            $confirm_password.css("border", "red solid 1px");
+        if ($password.val() !== $confirm_password.val() || !validatePassword($password.val())) {
+            $confirm_password.css("border", "2px red solid");
             $('#unmatched_password_reminder').show();
         } else {
-            $confirm_password.css("border", "1px solid grey");
+            $confirm_password.css("border", "2px solid green");
             $('#unmatched_password_reminder').hide();
         }
     }));
@@ -125,9 +156,11 @@ $(() => {
         }
         if (checkLength || checkLetter || checkNumber) {
             $("#password_structure_reminder span").css("color", "red")
+            $password.css("border", "2px solid red");
             return false;
         } else {
             $("#password_structure_reminder span").css("color", "green")
+            $password.css("border", "2px solid green");
             return true;
         }
     }

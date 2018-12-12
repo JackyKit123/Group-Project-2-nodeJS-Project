@@ -1,7 +1,70 @@
-.error_reminder {
+html,body {
+    height:100%
+}
+
+body {
+    background-image: url('/images/background.jpg');
+    background-size:cover;
+    background-repeat: no-repeat;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#error_message {
+    color: red;
+}
+
+#container {
+    font-size: 1.3em;
+    background: white;
+    margin: auto;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background-color: rgba(0, 0, 0, 0.8);
+    -webkit-box-shadow: 0px 0px 96px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 96px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 0px 0px 96px 0px rgba(0, 0, 0, 0.75);
+}
+
+img {
+    display: block;
+    margin: auto;
+    background-color:white;
+    border-radius: 5px;
+    width:100px;
+    height:100px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    width: 100%;
+    margin: auto;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+form div input {
+    width: 100%;
+    padding: 12px 20px;
+    display: inline-block;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type='submit']:hover {
+    background-color: darkgray
+}
+
+input[type='submit']:active {
+    background-color: rgb(59, 59, 59)
+}
+
+.reminder {
     display:none;
     color:red;
-}
-input {
-    border: 1px solid grey
 }

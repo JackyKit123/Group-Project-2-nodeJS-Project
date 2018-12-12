@@ -1,14 +1,18 @@
-{{#if error}}
-<div id="error_message">{{error}}</div>
-{{/if}}
-<h3>Enter Your Email Address</h3>
-<form action='/password/forget' method="POST">
-    <div>
-        <label>Email:</label>
-        <input type="text" name="email" autocomplete="on" placeholder="example@example.com">
+<div id='container'>
+    <div id='title_icon'>
+        <a href='/' title='Homepage'><img src='/images/blackjack-icon.png'></img></a>
     </div>
-    <div class="g-recaptcha" data-sitekey="{{recaptcha}}"></div>
-    <div>
-        <input type="submit" value="Request Password Change">
-    </div>
-</form>
+    {{#if error}}
+    <div id="error_message">{{error}}</div>
+    {{/if}}
+    <h3>Enter Your Email Address</h3>
+    <form action='/password/forget' method="POST">
+        <div class="form-group">
+            <input type="text" name="email" autocomplete="on" placeholder="example@example.com">
+        </div>
+        <div class="form-group g-recaptcha" data-sitekey="{{recaptcha}}"></div>
+        <div class="form-group">
+            <input type="submit" value="Request Password Change">
+        </div>
+    </form>
+</div>

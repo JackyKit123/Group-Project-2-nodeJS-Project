@@ -6,7 +6,7 @@ $(() => {
 
     //prevent user input interrupting script, remove disabled on load
     $('input').removeAttr("disabled");
-    $submit.attr('disabled','disabled');
+    $submit.attr('disabled', 'disabled');
 
     //valid password and show a password structure reminder
     $($password.focus(() => {
@@ -18,21 +18,23 @@ $(() => {
     }));
 
     $($password.focusout(() => {
-        if (validatePassword($password.val()))
+        if (validatePassword($password.val())) {
             $("#password_structure_reminder").hide();
         if ($password.val() == $confirm_password.val()) {
-            $confirm_password.css("border", "1px solid grey");
+            $confirm_password.css("border", "2px solid green");
             $('#unmatched_password_reminder').hide();
         }
+    }
     }));
 
     //validate the confirmed password
     $($confirm_password.focusout(() => {
-        if ($password.val() !== $confirm_password.val()) {
-            $confirm_password.css("border", "red solid 1px");
+        if ($password.val() !== $confirm_password.val() || !validatePassword($password.val())) {
+            $confirm_password.css("border", "2px red solid");
+            if ($password.val() !== $confirm_password.val())
             $('#unmatched_password_reminder').show();
         } else {
-            $confirm_password.css("border", "1px solid grey");
+            $confirm_password.css("border", "2px solid green");
             $('#unmatched_password_reminder').hide();
         }
     }));
@@ -75,9 +77,11 @@ $(() => {
         }
         if (checkLength || checkLetter || checkNumber) {
             $("#password_structure_reminder span").css("color", "red")
+            $password.css("border", "2px solid red");
             return false;
         } else {
             $("#password_structure_reminder span").css("color", "green")
+            $password.css("border", "2px solid green");
             return true;
         }
     }
