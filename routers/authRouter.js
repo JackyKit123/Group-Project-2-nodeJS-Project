@@ -22,12 +22,13 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
         failureFlash: true
     }), (req, res) => (req.session.save(() => res.redirect('/lobby'))));
 
-    router.post('/signup', async (req, res) => {
+    router.post('/signup',  recaptcha.middleware.verify, signupCaptcha, async (req, res) => {
         try {
             const username = req.body.username;
             const displayname = req.body.display_name;
             const email = req.body.email;
             const password = req.body.password;
+            const confirm_password = req.body.confirm_password;
             const checkUsername = await knex('login_info').where('username', username);
             const checkEmail = await knex('login_info').where('email', email);
             const usernameRegistered = checkUsername[0];
@@ -47,6 +48,10 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
             if (displayname.legnth < 5 || displayname.length > 15) {
                 req.flash('error', '<p>Bad Displayed Name</p>')
                 return res.redirect('/signup');
+            }
+            if (password !== confirm_password) {
+                req.flash('error', 'Password not matched');
+                return res.redirect(`/password/reset/${key}`);
             }
             if (typeof emailRegistered !== 'undefined' && emailRegistered.verifying) {
                 req.flash('error', `<p>Email is already registered but not verified, <a href='/resend/${email}'>Click Here<a> if you wish to recieve the verification email again.</p>`)
@@ -80,15 +85,21 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
         }
     });
 
-    router.post('/password/forget', recaptcha.middleware.verify, (req, res) => {
+    router.post('/password/forget', recaptcha.middleware.verify, async (req, res) => {
         if (req.recaptcha.error) {
             req.flash('error','Invalid reCAPTCHA');
             return res.redirect('/password/forget');
         }
         const resetKey = randomstring.generate();
         const email = req.body.email;
+        let exist = await knex('login_info').where('email', email);
+        exist = exist[0];
+        if (!exist) {
+            req.flash('error','Email does not match any user');
+            return res.redirect('/password/forget');
+        }
         redisClient.setex(`${resetKey}`, 60 * 60 * 24 , email);
-        nodemailer.sendPasswordResetMail(email, resetKey)
+        nodemailer.sendPasswordResetMail(email, resetKey);
         req.flash('success', 'Please check your mailbox for instruction to reset your password, Please note that the email may be in junk mail box')
         res.redirect('/success');
     });
@@ -96,8 +107,13 @@ module.exports = (router, recaptcha, passport, knex, randomstring, bcrypt, nodem
     router.post('/password/reset/:id', (req, res) => {
         const key = req.params.id;
         const password = req.body.password;
+        const confirm_password = req.body.confirm_password;
         if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) {
             req.flash('error', '<p>Bad Password</p>')
+            return res.redirect(`/password/reset/${key}`);
+        }
+        if (password !== confirm_password) {
+            req.flash('error', 'Password not matched');
             return res.redirect(`/password/reset/${key}`);
         }
         redisClient.get(key, async (err, email) => {
