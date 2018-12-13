@@ -17,7 +17,11 @@ server = https.createServer(options, app),
 io = require('socket.io')(server),
 bodyParser = require('body-parser'),
 hb = require('express-handlebars'),
+Recaptcha = require('express-recaptcha').Recaptcha,
 passport = require('passport'),
+LocalStrategy = require('passport-local').Strategy,
+FacebookStrategy = require('passport-facebook').Strategy,
+GoogleStrategy = require('passport-google-oauth20').Strategy,
 bcrypt = require('bcrypt'),
 nodemailer = require('nodemailer'),
 randomstring = require("randomstring"),
@@ -25,8 +29,6 @@ flash = require('connect-flash'),
 expressSession = require('express-session'),
 RedisStore = require('connect-redis')(expressSession),
 socketIOSession = require("socket.io.session"),
-LocalStrategy = require('passport-local').Strategy,
-FacebookStrategy = require('passport-facebook').Strategy,
 redis  = require('redis'),
 knex = require('knex')({
   client: 'postgresql',
@@ -42,11 +44,12 @@ const
 Bcrypt = require('./auth/bcrypt'),
 NodeMailer = require('./auth/mailVerify'),
 redisClient = require('./util/redis')(redis),
-router = require('./routers/router')(express, passport, knex);
+authService = require('./auth/authService'),
+router = require('./routers/router')(express, redisClient, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, new authService(knex, new Bcrypt(bcrypt), new NodeMailer(nodemailer), randomstring, redisClient));
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
-require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, randomstring, new Bcrypt(bcrypt), new NodeMailer(nodemailer), knex);
-require('./util/socket.io')(io);
+require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
+require('./util/socket.io')(io, redisClient);
 
 //server starts
 server.listen(process.env.PORT, () => console.log(`server started at port ${process.env.PORT} at ${new Date()}`));

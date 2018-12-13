@@ -1,42 +1,45 @@
-module.exports = (passport, LocalStrategy, FacebookStrategy, randomstring, bcrypt, nodemailer, knex) => {
+module.exports = (passport, LocalStrategy, FacebookStrategy, GoogleStrategy, bcrypt, knex) => {
     passport.use('local-login', new LocalStrategy(
-        async (email, password, done) => {
+        async (username, password, done) => {
             try {
-                let user = await knex('login_info').where({ email: email });
-                user = user[0]
-                if (user.length == 0) return done(null, false, { message: 'Incorrect credentials.' });
-                if (typeof user.verifying !== 'undefined') return done(null, false, { message: 'Email is not verified, please check your mailbox for verification'})
+                const loginByEmail = await knex('login_info').where({ email: username });
+                const loginByUsername = await knex('login_info').where({ username: username });
+                let user;
+                if (loginByEmail.length > 0) {
+                    user = loginByEmail[0];
+                } else if (loginByUsername.length > 0) {
+                    user = loginByUsername[0];
+                }  else {
+                    return done(null, false, { message: '<p>Incorrect credentials.</p>' })
+                };
+                if (user.verifying) return done(null, false, { message: `<p>Email is already registered but not verified, <a href='/resend/${username}'>Click Here</a> if you wish to recieve the verification email again.</p>` })
                 const result = await bcrypt.checkPassword(password, user.password);
-                return (result) ? done(null, user) : done(null, false, { message: 'Incorrect credentials.' });
+                return (result) ? done(null, user) : done(null, false, { message: '<p>Incorrect credentials.</p>' });
             } catch (err) {
                 return done(err);
             }
         }
     ));
 
-    passport.use('local-signup', new LocalStrategy(
-        async (email, password, done) => {
-            try {
-                const user = await knex('login_info').where({ email: email });
-                if (!/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(email)) return done(null, false, { message: 'Invalid Email Address' });
-                if (password.length < 8 || password.legnth > 16 || ! /[a-z]|[A-z]/.test(password) || ! /[0-9]/.test(password)) return done(null, false, { message: 'Bad Password' });
-                if (user.verifying) return done(null, false, { message: 'Email is already registered but not verified' })
-                if (user.email) return done(null, false, { message: 'Email has already been taken' })
-                const hash = await bcrypt.hashPassword(password);
-                const verifyString = randomstring.generate();
-                const newUser = {
-                    email: email,
-                    password: hash,
-                    verifying: verifyString
-                };
-                nodemailer.sendMail(email, verifyString);
-                const userId = await knex('login_info').insert(newUser).returning('id');
-                newUser.id = userId[0];
-                return done(null, false, {message: 'Registered'});
-            } catch (err) {
-                return done(err);
+    passport.use('google', new GoogleStrategy({
+        clientID: process.env.GOOGLE_ID,
+        clientSecret: process.env.GOOGLE_SECRET,
+        callbackURL: `/auth/google/callback`
+    }, async (accessToken, refreshToken, profile, done) => {
+        const matchedUser = await knex('login_info').where({ access_token: accessToken })
+        if (matchedUser.length === 0) {
+            const newUser = {
+                display_name: profile.displayName,
+                google_id: profile.id,
+                access_token: accessToken
             }
-        }));
+            const userId = await knex('login_info').insert(newUser).returning('id');
+            newUser.id = userId[0];
+            return done(null, newUser)
+        }
+        return done(null, matchedUser[0]);
+    }
+    ));
 
     passport.use('facebook', new FacebookStrategy({
         clientID: process.env.FACEBOOK_ID,
@@ -46,6 +49,7 @@ module.exports = (passport, LocalStrategy, FacebookStrategy, randomstring, bcryp
         const matchedUser = await knex('login_info').where({ access_token: accessToken })
         if (matchedUser.length === 0) {
             const newUser = {
+                display_name: profile.displayName,
                 facebook_id: profile.id,
                 access_token: accessToken
             }

@@ -17,8 +17,6 @@ body {
 
 #container {
     font-size: 1.3em;
-    background: white;
-    overflow: auto;
     margin: auto;
     width: 350px;
     display: flex;
@@ -39,6 +37,10 @@ img {
     width:100px;
     height:100px;
     margin-bottom: 30px;
+}
+
+h3 {
+    color:white;
 }
 
 .form-group {
@@ -63,9 +65,4 @@ input[type='submit']:hover {
 
 input[type='submit']:active {
     background-color: rgb(59, 59, 59)
-}
-
-.reminder {
-    display:none;
-    color:red;
 }

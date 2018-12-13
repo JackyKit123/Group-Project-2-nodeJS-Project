@@ -11,14 +11,9 @@ body {
     justify-content: center;
 }
 
-#error_message {
-    color: red;
-}
-
 #container {
     font-size: 1.3em;
     background: white;
-    overflow: auto;
     margin: auto;
     width: 350px;
     display: flex;
@@ -68,4 +63,8 @@ input[type='submit']:active {
 .reminder {
     display:none;
     color:red;
+}
+
+#error_message {
+    color: red;
 }

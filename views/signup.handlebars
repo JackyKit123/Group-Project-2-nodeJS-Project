@@ -1,28 +1,45 @@
-{{#if error}}
-<div id="error_message">{{error}}</div>
-{{/if}}
-<form action="/signup" method="post">
-    <div>
-        <label>Email:</label>
-        <input type="text" name="username" autocomplete="on" placeholder="example@example.com" disabled>{{!prevent user input before document loads}}
+<div id='container'>
+    <div id='title_icon'>
+        <a href='/' title='Homepage'><img src='/images/blackjack-icon.png'></img></a>
     </div>
-    <div>
-        <label>Password:</label>
-        <input type="password" name="password" placeholder="．．．．．．．．" disabled>
-    </div>
-    <div id='password_structure_reminder'>
-        <span>Your password must contain the following</span>
-    <ul>
-        <li id='length'>8 to 16 characters long ✘</li>
-        <li id='letter'>Has any letters ✘</li>
-        <li id='number'>Has any numbers ✘</li>
-    </ul>
-    </div>
-    <div>
-        <label>Confirm Password:</label>
-        <input type="password" name="confirm_password" placeholder="．．．．．．．．" disabled>
-    </div>
-    <div>
-        <input type="submit" value="Sign up" disabled>
-    </div>
-</form>
+    {{#if error}}
+    <div id="error_message"><strong>{{{error}}}</strong></div>
+    {{/if}}
+    <form action="/signup" method="post">
+        <div>
+            <input type="text" name="username" autocomplete="on" placeholder="Username" disabled>{{!prevent user
+            input
+            before document loads}}
+            <div class='reminder' id='username_reminder'>Your username should be
+                5-15characters long, and contain underscore, alphabet or numbers only</div>
+        </div>
+        <div>
+            <input type="text" name="display_name" autocomplete="on" placeholder="Disaplyed Name" disabled>
+            <div class='reminder' id='displayedname_reminder'>Your displayed name should be
+                5-15characters long</div>
+        </div>
+        <div>
+            <input type="text" name="email" autocomplete="on" placeholder="Email" disabled>
+            <div class='reminder' id='email_reminder'>Invalid Email!</div>
+        </div>
+        <div>
+            <input type="password" name="password" placeholder="Password" disabled>
+        </div>
+        <div class='reminder' id='password_structure_reminder'>
+            <span>Your password must contain the following</span>
+            <ul>
+                <li id='length'>8 to 16 characters long ✘</li>
+                <li id='letter'>Has any letters ✘</li>
+                <li id='number'>Has any numbers ✘</li>
+            </ul>
+        </div>
+        <div>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" disabled>
+            <div class='reminder' id='unmatched_password_reminder'>password not matched</div>
+        </div>
+        <div class="g-recaptcha" data-sitekey="{{recaptcha}}"></div>
+        <div>
+            <input type="submit" value="Sign up" disabled>
+        </div>
+    </form>
+</div>

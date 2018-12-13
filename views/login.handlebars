@@ -1,25 +1,29 @@
-{{#if error}}
-<div>{{error}}</div>
-{{/if}}
-{{#if success}}
-<div>{{success}}</div>
-{{/if}}
-<form action="/login" method="post">
+<div id='container'>
+    <form action="/login" method="post">
+    <div id='title_icon'>
+    <a href='/' title='Homepage'><img src='/images/blackjack-icon.png'></img></a>
+    </div>
+        {{#if error}}
+        <div id='error_message'><strong>{{{error}}}</strong></div>
+        {{/if}}
+        <div class='form-group'>
+            <input type="text" name="username" placeholder="Email/Username" />
+        </div>
+        <div class='form-group'>
+            <input type="password" name="password" placeholder="Password" />
+        </div>
+        <div class='form-group'>
+        <a href='password/forget'>forget password?</a><a id='signup' href='/signup'>signup?</a>
+        </div>
+        <div class="g-recaptcha" data-sitekey="{{recaptcha}}"></div>
+        <div class='form-group'>
+            <input type="submit" value="Login" />
+        </div>
+    </form>
     <div>
-        <label>email:</label>
-        <input type="text" name="username" />
+        <a href='/auth/facebook'><button class="loginBtn loginBtn--facebook" />Login with Facebook</button></a>
     </div>
     <div>
-        <label>Password:</label>
-        <input type="password" name="password" />
+        <a href='/auth/google'><button class="loginBtn loginBtn--google" />Login with Google</button></a>
     </div>
-    <div>
-        <input type="submit" value="Log In" />
-    </div>
-</form>
-<div>
-    <a href='/auth/facebook'><input type="submit" value="Login with Facebook" /></a>
-</div>
-<div>
-    <a href='/signup'><input type="submit" value="Sign Up" /></a>
 </div>

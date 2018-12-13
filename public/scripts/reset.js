@@ -1,7 +1,4 @@
 $(() => {
-    const $username = $("input[name='username']");
-    const $displayname = $("input[name='display_name']");
-    const $email = $("input[name='email']");
     const $password = $("input[name='password']");
     const $confirm_password = $("input[name='confirm_password']");
     const $submit = $("input[type='submit']");
@@ -10,73 +7,6 @@ $(() => {
     //prevent user input interrupting script, remove disabled on load
     $('input').removeAttr("disabled");
     $submit.attr('disabled', 'disabled');
-
-    //validate username input
-    $($username.focus(() => {
-        $('#username_reminder').show();
-        if (!validateUsername($username.val())) {
-            $username.css("border", "2px red solid");
-            $('#username_reminder').css('color', 'red');
-        } else {
-            $username.css("border", "2px solid green");
-            $('#username_reminder').css('color', 'green');
-        }
-    }))
-
-    $($username.keyup(() => {
-        if (!validateUsername($username.val())) {
-            $username.css("border", "2px red solid");
-            $('#username_reminder').css('color', 'red');
-        } else {
-            $username.css("border", "2px solid green");
-            $('#username_reminder').css('color', 'green');
-        }
-    }))
-
-    $($username.focusout(() => {
-        if (validateUsername($username.val())) {
-            $('#username_reminder').hide();
-        }
-    }));
-
-    //validate display name
-    $($displayname.focus(() => {
-        $('#displayedname_reminder').show();
-        if (!validateDisplayName($displayname.val())) {
-            $displayname.css("border", "2px red solid");
-            $('#displayedname_reminder').css('color', 'red');
-        } else {
-            $displayname.css("border", "2px solid green");
-            $('#displayedname_reminder').css('color', 'green');
-        }
-    }))
-
-    $($displayname.keyup(() => {
-        if (!validateDisplayName($displayname.val())) {
-            $displayname.css("border", "2px red solid");
-            $('#displayedname_reminder').css('color', 'red');
-        } else {
-            $displayname.css("border", "2px solid green");
-            $('#displayedname_reminder').css('color', 'green');
-        }
-    }))
-
-    $($displayname.focusout(() => {
-        if (validateDisplayName($displayname.val())) {
-            $('#displayedname_reminder').hide();
-        }
-    }));
-
-    //validate email input
-    $($email.focusout(() => {
-        if (!validateEmail($email.val())) {
-            $email.css("border", "2px red solid");
-            $('#email_reminder').show();
-        } else {
-            $email.css("border", "2px solid green");
-            $('#email_reminder').hide();
-        }
-    }));
 
     //valid password and show a password structure reminder
     $($password.focus(() => {
@@ -101,6 +31,7 @@ $(() => {
     $($confirm_password.focusout(() => {
         if ($password.val() !== $confirm_password.val() || !validatePassword($password.val())) {
             $confirm_password.css("border", "2px red solid");
+            if ($password.val() !== $confirm_password.val())
             $('#unmatched_password_reminder').show();
         } else {
             $confirm_password.css("border", "2px solid green");
@@ -110,25 +41,11 @@ $(() => {
 
     //only allow user to press submit once all identities are validated
     $(document).keyup(() => {
-        if (validateUsername($username.val()) && validateEmail($email.val()) && validatePassword($password.val()) && $password.val() == $confirm_password.val())
+        if (validatePassword($password.val()) && $password.val() == $confirm_password.val())
             $submit.removeAttr("disabled");
         else
             $submit.attr("disabled", "disabled");
     })
-
-    const validateEmail = email => {
-        const validator = /(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-        return validator.test(email);
-    }
-
-
-    const validateUsername = username => {
-        return (username.length >= 5 && username.length <= 15 && !/\W/.test(username))
-    }
-
-    const validateDisplayName = name => {
-        return (name.length >= 5 && name.length <= 15)
-    }
 
     const validatePassword = password => {
         const $length = $("#password_structure_reminder #length");

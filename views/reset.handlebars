@@ -1,0 +1,26 @@
+<div id='container'>
+    {{#if error}}
+    <div id="error_message"><strong>{{{error}}}</strong></div>
+    {{/if}}
+    <form action="/password/reset/{{key}}" method="post">
+        <div class='form-group'>
+            <input type="password" name="password" placeholder="New Password" disabled>
+        </div>
+        <div class='reminder' id='password_structure_reminder'>
+            <span>Your password must contain the following</span>
+            <ul>
+                <li id='length'>8 to 16 characters long ✘</li>
+                <li id='letter'>Has any letters ✘</li>
+                <li id='number'>Has any numbers ✘</li>
+            </ul>
+        </div>
+        <div class='form-group'>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" disabled>
+            <div class='reminder' id='unmatched_password_reminder'>password not matched</div>
+        </div>
+        <div class="g-recaptcha" data-sitekey="{{recaptcha}}"></div>
+        <div class='form-group'>
+            <input type="submit" value="Confirm" disabled>
+        </div>
+    </form>
+</div>
