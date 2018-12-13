@@ -1,4 +1,10 @@
 <h1>This is the lobby</h1>
 <form action="/logout" method="POST">
-<input type="submit"  value="Logout"></input>
+    <input type="submit" value="Logout"></input>
 </form>
+<button id='create'>Create Room</button>
+<ul id='list'>
+    {{#each list}}
+    <li id='{{this}}'>Join Room {{this}}</li>
+    {{/each}}
+</ul>

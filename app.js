@@ -45,11 +45,11 @@ Bcrypt = require('./auth/bcrypt'),
 NodeMailer = require('./auth/mailVerify'),
 redisClient = require('./util/redis')(redis),
 authService = require('./auth/authService'),
-router = require('./routers/router')(express, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, new authService(knex, new Bcrypt(bcrypt), new NodeMailer(nodemailer), randomstring, redisClient));
+router = require('./routers/router')(express, redisClient, new Recaptcha(process.env.reCAPTCHA_SITE_KEY, process.env.reCAPTCHA_SECRET_KEY), passport, new authService(knex, new Bcrypt(bcrypt), new NodeMailer(nodemailer), randomstring, redisClient));
 require('./init/init-session')(app, io, redisClient, expressSession, RedisStore, socketIOSession);
 require('./init/init-app')(express, app, bodyParser, hb, router, passport, flash);
 require('./auth/passport')(passport, LocalStrategy, FacebookStrategy, GoogleStrategy, new Bcrypt(bcrypt), knex);
-require('./util/socket.io')(io);
+require('./util/socket.io')(io, redisClient);
 
 //server starts
 server.listen(process.env.PORT, () => console.log(`server started at port ${process.env.PORT} at ${new Date()}`));

@@ -1,0 +1,23 @@
+<div class="game">
+    <h1>Blackjack</h1>
+    <form id='initial'>
+        Number of players:<br>
+        <input type="text" name="playerCount" id='playercount' placeholder="2" autocomplete="off"><br>
+        <input type="submit" value="Submit">
+    </form>
+    <input type="button" class="btn" id="btnStart" value="start"/>
+    <input type="button" class="btn" id='hitMe' value="hit me"/>
+    <input type="button" class="btn" id='stay' value="stay"/>
+    <input type="button" class="btn" value="double down"/>
+
+    <div id="dealer"></div>
+    <div id="players" class="players">
+    </div>
+
+    <div id="deck" class="deck">
+        <div class="card" id="deckcount">52</div>
+        <div class="status" id="status"></div>
+    </div>
+
+    <div class="clear"></div>
+</div>

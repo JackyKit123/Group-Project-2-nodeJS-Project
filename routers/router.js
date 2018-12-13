@@ -1,6 +1,6 @@
-module.exports = (express, recaptcha, passport, authService) => {
+module.exports = (express, redisClient, recaptcha, passport, authService) => {
     const router = express.Router();
-    require('./viewRouter')(router, authService);
+    require('./viewRouter')(router, redisClient, authService);
     require('./authRouter')(router, recaptcha, passport, authService)
     return router;
 };
